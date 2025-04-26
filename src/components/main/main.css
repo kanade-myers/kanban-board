@@ -1,0 +1,311 @@
+.body,
+html {
+  height: 100%;
+}
+
+.main {
+  background-color: #0079bf;
+  max-height: 1200px;
+  flex: 1;
+  padding: 20px 16px 0 16px;
+  display: flex;
+  align-items: start;
+  flex-wrap: wrap;
+}
+
+.main-wrap {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-backlog,
+.main-ready,
+.main-inProgress,
+.main-finished {
+  display: inline-block;
+  background-color: #ebecf0;
+  border-radius: 10px;
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: black;
+  padding: 12px 12px 8px 12px;
+  margin-right: 24px;
+  width: 282px;
+  user-select: none;
+}
+
+.main-task {
+  padding: 7px 10px 7px 8px;
+  background-color: #ffffff;
+  margin-top: 15px;
+  border-radius: 5px;
+}
+
+.main-task:hover {
+  transition: 0.2s;
+  filter: brightness(90%);
+  cursor: pointer;
+}
+
+.main-BacklogAddCard,
+.main-ReadyAddCard,
+.main-InProgressAddCard,
+.main-FinishedAddCard {
+  color: #5e6c84;
+  margin-top: 17px;
+  cursor: pointer;
+  max-width: 110px;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px 4px 8px;
+  border-radius: 5px;
+}
+
+.main-BacklogAddCard:hover {
+  background-color: white;
+  transition: 0.2s;
+}
+.main-ReadyAddCard:hover {
+  background-color: white;
+  transition: 0.2s;
+}
+.main-InProgressAddCard:hover {
+  background-color: white;
+  transition: 0.2s;
+}
+.main-FinishedAddCard:hover {
+  background-color: white;
+  transition: 0.2s;
+}
+
+.main-BacklogAddCard img {
+  margin-right: 5px;
+}
+.main-ReadyAddCard img {
+  margin-right: 5px;
+}
+.main-InProgressAddCard img {
+  margin-right: 5px;
+}
+.main-FinishedAddCard img {
+  margin-right: 5px;
+}
+
+.main-addCard-input {
+  border-bottom: 1px solid black;
+  width: 100%;
+}
+
+.main-backlog-input,
+.main-ready-input,
+.main-InProgress-input,
+.main-Finished-input {
+  display: none;
+  padding: 7px 10px 7px 8px;
+  background-color: #ffffff;
+  margin-top: 15px;
+  border-radius: 5px;
+}
+
+.main-BacklogSubmit {
+  color: #5e6c84;
+  margin-top: 17px;
+  cursor: pointer;
+  width: 102px;
+  padding: 4px 8px 4px 8px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  display: none;
+  border: 1px gray solid;
+}
+
+.main-BacklogSubmit:hover {
+  background-color: #0079bf;
+  color: white;
+  transition: 0.2s;
+}
+
+.main-ready-input {
+  justify-content: end;
+  padding-right: 0;
+}
+
+.main-ready-input img {
+  margin-right: 10px;
+}
+
+.main-ready-inputList {
+  margin-top: 25px;
+  position: absolute;
+  display: none;
+  width: 258px;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.main-ready-inputList div {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  padding: 8px 10px 8px 7px;
+  word-break: break-all;
+}
+
+.main-ready-inputList div:hover {
+  background-color: #dedede;
+  transition: 0.2s;
+}
+
+.main-ready-inputList div:hover:last-child {
+  border-radius: 0 0 5px 5px;
+  transition: 0.2s;
+}
+
+/* InProgress */
+
+.main-InProgress-inputList div:hover {
+  background-color: #dedede;
+  transition: 0.2s;
+}
+
+.main-InProgress-inputList div:hover:last-child {
+  border-radius: 0 0 5px 5px;
+  transition: 0.2s;
+}
+
+.main-InProgress-inputList div:hover {
+  background-color: #dedede;
+  transition: 0.2s;
+}
+
+.main-InProgress-input {
+  justify-content: end;
+  padding-right: 0;
+}
+
+.main-InProgress-input img {
+  margin-right: 10px;
+}
+
+.main-InProgress-inputList {
+  margin-top: 25px;
+  position: absolute;
+  display: none;
+  width: 258px;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.main-InProgress-inputList div {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  padding: 8px 10px 8px 7px;
+  word-break: break-all;
+}
+
+/* Finished */
+
+.main-Finished-inputList div:hover {
+  background-color: #dedede;
+  transition: 0.2s;
+}
+
+.main-Finished-inputList div:hover:last-child {
+  border-radius: 0 0 5px 5px;
+  transition: 0.2s;
+}
+
+.main-Finished-inputList div:hover {
+  background-color: #dedede;
+  transition: 0.2s;
+}
+
+.main-Finished-input {
+  justify-content: end;
+  padding-right: 0;
+}
+
+.main-Finished-input img {
+  margin-right: 10px;
+}
+
+.main-Finished-inputList {
+  margin-top: 25px;
+  position: absolute;
+  display: none;
+  width: 258px;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.main-Finished-inputList div {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  padding: 8px 10px 8px 7px;
+  word-break: break-all;
+}
+
+/* Модуль OpenDescription */
+
+.main-description {
+  display: none;
+  background-color: white;
+  border-radius: 5px;
+  padding: 22px 28px 22px 28px;
+  width: 95%;
+  height: 75%;
+  position: absolute;
+  box-sizing: border-box;
+}
+
+.main-description-header {
+  cursor: default;
+  display: flex;
+  justify-content: space-between;
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+.main-description-header img {
+  cursor: pointer;
+}
+
+.main-description-text {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  padding: 35px 0 0 0;
+}
+
+.main-description-textArea {
+  border: none;
+}
+
+.main-description-textArea:focus {
+  outline: none;
+}
+
+.main-description-text textarea {
+  height: 100%;
+  width: 100%;
+  resize: none;
+}

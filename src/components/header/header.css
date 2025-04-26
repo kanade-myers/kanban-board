@@ -1,0 +1,67 @@
+.header {
+  background-color: #0067a3;
+  color: white;
+  font-family: "Roboto";
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  display: flex;
+  justify-content: space-between;
+  min-height: 55px;
+  width: 100%;
+}
+
+.header-logo {
+  padding: 11px 0 18px 20px;
+  cursor: pointer;
+}
+
+.header-avatar-logo {
+  padding: 7px 0 8px 0;
+  cursor: pointer;
+}
+
+.header-avatar-arrow {
+  padding: 15px 16px 16px 0;
+  cursor: pointer;
+}
+
+/* Выпадающий список */
+
+.header-avatar-list {
+  margin-top: 7px;
+  position: absolute;
+  display: none;
+  width: 134px;
+  background-color: white;
+  border-radius: 5px;
+  transform: translateX(-70px);
+}
+
+.header-avatar-list div {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  padding: 8px 10px 8px 7px;
+  color: black;
+  word-break: break-all;
+  cursor: pointer;
+}
+
+.header-avatar-list div:hover {
+  background-color: white;
+  filter: brightness(85%);
+  border-radius: 5px 5px 0px 0px;
+}
+
+.header-avatar-list div:last-child {
+  border-radius: 0 0 5px 5px;
+}
+
+.header-avatar-list img {
+  position: absolute;
+  transform: translate(36px, -16px);
+}
