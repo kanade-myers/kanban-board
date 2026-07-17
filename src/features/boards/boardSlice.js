@@ -3,10 +3,10 @@ import { createAsyncThunk, createSlice } from '@redux/toolkit'
 const initialState = {
     tasks: {
         byId: {
-            '1': {id: crypto.randomUUID(), title: 'Задача 1', desc: 'дескрипш', createAt: Date.now() },
-            '2': {id: crypto.randomUUID(), title: 'Задача 2', desc: 'дескрипш', createAt: Date.now() },
-            '3': {id: crypto.randomUUID(), title: 'Задача 3', desc: 'дескрипш', createAt: Date.now() },
-            '4': {id: crypto.randomUUID(), title: 'Задача 4', desc: 'дескрипш', createAt: Date.now() },
+            '1': {id: crypto.randomUUID(), title: 'Задача 1', desc: 'дескрипш', createAt: Date.now(), status: 'backlog'},
+            '2': {id: crypto.randomUUID(), title: 'Задача 2', desc: 'дескрипш', createAt: Date.now(), status: 'ready' },
+            '3': {id: crypto.randomUUID(), title: 'Задача 3', desc: 'дескрипш', createAt: Date.now(), status: 'in-progress'},
+            '4': {id: crypto.randomUUID(), title: 'Задача 4', desc: 'дескрипш', createAt: Date.now(), status: 'finished'},
         }
     },
         columns: {

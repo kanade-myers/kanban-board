@@ -32,10 +32,10 @@ async function logoutUser() {
   }
 }
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.dir('Текущий пользователь:', user.uid);
-  } else {
-    console.dir('Пользователь не авторизован');
-  }
-});
+// onAuthStateChanged(auth, (user) => {
+//   if (user) {
+//     console.dir('Текущий пользователь:', user.uid);
+//   } else {
+//     console.dir('Пользователь не авторизован');
+//   }
+// });
