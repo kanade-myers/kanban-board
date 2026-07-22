@@ -1,5 +1,5 @@
 import { collection, addDoc, getDocs, getDoc, doc, updateDoc,
-     deleteDoc, query, where, orderBy, serverTimestamp} from 'firebase/firestore'
+         deleteDoc, query, where, orderBy, serverTimestamp} from 'firebase/firestore'
 
 import { db, auth } from './config.js'
 
@@ -13,22 +13,18 @@ export async function addTask(taskData) {
         const newTask = {
             title: taskData.title || 'Без названия',
             desc: taskData.desc || '',
-            status: taskData.status | 'backlog',
+            status: taskData.status || 'backlog',
             user: user.uid,
             createdAt: taskData.createdAt || Date.now(),
         }
 
         const docRef = await addDoc(collection(db, 'tasks'), newTask)
 
-        return {
-            id: docRef.id,
-            ...newTask,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        }
+        return docRef.id
     }
     catch(error) {
         console.dir('Ошибка добавления задачи:', error)
+        throw new Error(error)
     }
 }
 

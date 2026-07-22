@@ -1,19 +1,20 @@
-import { createAsyncThunk, createSlice } from '@redux/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { addTask } from '../../api/firebase/db' 
 
 const initialState = {
     tasks: {
         byId: {
-            '1': {id: crypto.randomUUID(), title: 'Задача 1', desc: 'дескрипш', createAt: Date.now(), status: 'backlog'},
-            '2': {id: crypto.randomUUID(), title: 'Задача 2', desc: 'дескрипш', createAt: Date.now(), status: 'ready' },
-            '3': {id: crypto.randomUUID(), title: 'Задача 3', desc: 'дескрипш', createAt: Date.now(), status: 'in-progress'},
-            '4': {id: crypto.randomUUID(), title: 'Задача 4', desc: 'дескрипш', createAt: Date.now(), status: 'finished'},
+            '1': {id: '1', title: 'Задача 1', desc: 'дескрипш', createdAt: Date.now(), status: 'backlog'},
+            '2': {id: '2', title: 'Задача 2', desc: 'дескрипш', createdAt: Date.now(), status: 'ready' },
+            '3': {id: '3', title: 'Задача 3', desc: 'дескрипш', createdAt: Date.now(), status: 'in-progress'},
+            '4': {id: '4', title: 'Задача 4', desc: 'дескрипш', createdAt: Date.now(), status: 'finished'},
         }
     },
         columns: {
-            'backlog': [1],
-            'ready': [2],
-            'in-progress': [3],
-            'finished': [4],
+            'backlog': ['1'],
+            'ready': ['2'],
+            'in-progress': ['3'],
+            'finished': ['4'],
     }
 }
 
@@ -21,7 +22,7 @@ export const boardSlice = createSlice({
     name: 'board',
     initialState,
     reducers: {
-        addOptimistic: (state, action) => {
+        addTaskOptimistic: (state, action) => {
             const task = {
                 id: action.payload.id,
                 title: action.payload.title,
@@ -33,19 +34,19 @@ export const boardSlice = createSlice({
 
             state.tasks.byId[task.id] = task
 
-            state.tasks.columns[task.status].push(task.id)
+            state.columns[task.status].push(task.id)
         },
         // TODO закончить остальные методы
-    //     moveToOptimistic: (state, action) => {
+    //     moveTaskOptimistic: (state, action) => {
     //         const id = action.payload.id
     //         const initialStatus = state.tasks.byId[id].status
     //         const targetStatus = action.payload.to
 
-    //         state.tasks.columns[initialStatus] = state.tasks.columns[initialStatus].filter((item) => item !== id)
+    //         state.columns[initialStatus] = state.columns[initialStatus].filter((item) => item !== id)
     //         state.tasks.byId[id].status = targetStatus
-    //         state.tasks.columns[targetStatus].push(id)
+    //         state.columns[targetStatus].push(id)
     //     },
-    //     editOptimistic: (state, action) => {
+    //     editTaskOptimistic: (state, action) => {
     //         const taskId = state.tasks.byId[action.payload.id]
     //         if (!taskId) {
     //             console.warn(`Задача ${taskId} не найдена`)
@@ -61,19 +62,51 @@ export const boardSlice = createSlice({
     //         }
             
     //     },
-    //     deleteOptimistic: (state, action) => {
+    //     deleteTaskOptimistic: (state, action) => {
     //         const id = action.payload.id
     //         delete state.tasks.byId[id]
             
-    //         Object.keys(state.tasks.columns).forEach(column => {
-    //             state.tasks.columns[column] = state.tasks.columns[column]
+    //         Object.keys(state.columns).forEach(column => {
+    //             state.columns[column] = state.columns[column]
     //             .filter(item => item !== id)
     // })
     //     }
     },
      extraReducers: builder => {
         builder
-        // TODO доделать
+            .addCase(addToFirebaseAsync.fulfilled, (state, action) => {
+                const tempId = action.payload.tempId
+                const realId = action.payload.realId
+
+                const task = state.tasks.byId[tempId]
+                if (task) {
+                    const column = state.columns[task.status]
+                    const index = column.indexOf(tempId)
+                    if (index !== -1) {
+                        column[index] = realId
+                    }
+                    
+                    task.id = realId
+                    task._isPending = false
+                    
+                    state.tasks.byId[realId] = task 
+                    delete state.tasks.byId[tempId]
+                }
+            })
+            .addCase(addToFirebaseAsync.rejected, (state, action) => {
+                const id = action.payload.id
+                const task = state.tasks.byId[id]
+                
+                if (task) {
+                    const column = state.columns[task.status]
+                    if (column) {
+                        state.columns[task.status] = column.filter(item => item !== id)
+                    }
+                    delete state.tasks.byId[id]
+                }
+                
+                console.warn('Произошел откат задачи:', id)
+            })
      }
 })
 
@@ -87,28 +120,41 @@ export default boardSlice.reducer
 
 // Селекторы для получения задач по колонкам
 export const selectBacklogTasks = (state) => {
-    const taskIds = state.columns['backlog'] || []
-    return taskIds.map(id => state.tasks.byId[id]).filter(Boolean)
+    const taskIds = state.boards.columns['backlog'] || []
+    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
 }
 
 export const selectReadyTasks = (state) => {
-    const taskIds = state.columns['ready'] || []
-    return taskIds.map(id => state.tasks.byId[id]).filter(Boolean)
+    const taskIds = state.boards.columns['ready'] || []
+    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
 }
 
 export const selectInProgressTasks = (state) => {
-    const taskIds = state.columns['in-progress'] || []
-    return taskIds.map(id => state.tasks.byId[id]).filter(Boolean)
+    const taskIds = state.boards.columns['in-progress'] || []
+    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
 }
 
 export const selectFinishedTasks = (state) => {
-    const taskIds = state.columns['finished'] || []
-    return taskIds.map(id => state.tasks.byId[id]).filter(Boolean)
+    const taskIds = state.boards.columns['finished'] || []
+    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
 }
 
 export const addToFirebaseAsync = createAsyncThunk(
     'board/addToFirebase',
-    async (tempId) => {
-        //TODO сделать запрос в фаербазу
+    async (taskData, {rejectWithValue}) => {
+        try {
+            const firebaseTaskId = await addTask(taskData)
+            return {
+                tempId: taskData.id,
+                realId: firebaseTaskId
+            }
+        }
+        catch(error) {
+            console.dir(`Ошибка добавления задачи в firebase, временное id: ${taskData.id}`)
+            return rejectWithValue({
+                error: error.message,
+                id: taskData.id
+            })
+        }
     }
 )
