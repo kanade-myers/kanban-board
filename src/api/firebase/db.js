@@ -28,98 +28,105 @@ export async function addTask(taskData) {
     }
 }
 
-    // TODO доделать остальные методы
-// export async function getTasks() {
-//     try {
-//         const user = auth.currentUser;
-//         if (!user) {
-//             throw new Error('Пользователь не авторизован');
-//         }
+export async function getTasks() {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('Пользователь не авторизован');
+        }
 
-//         // Создаем запрос: все задачи пользователя, сортировка по order
-//         const q = query(
-//             collection(db, 'tasks'),
-//             where('userId', '==', user.uid)
-//         );
+        // Создаем запрос: все задачи пользователя, сортировка по order
+        const q = query(
+            collection(db, 'tasks'),
+            where('userId', '==', user.uid)
+        );
 
-//         const querySnapshot = await getDocs(q);
-//         const tasks = {};
+        const querySnapshot = await getDocs(q);
+        const tasks = {};
         
-//         querySnapshot.forEach((doc) => {
-//             const data = doc.data();
-//             tasks[doc.id] = {
-//                 id: doc.id,
-//                 ...data,
-//                 // Конвертируем Timestamp в строку для удобства
-//                 createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-//             };
-//         });
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            tasks[doc.id] = {
+                id: doc.id,
+                ...data,
+                // Конвертируем Timestamp в строку для удобства
+                createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
+            };
+        });
 
-//         return tasks;
-//     } catch (error) {
-//         console.dir('Ошибка получения задач:', error);
-//     }
-// }
+        return tasks;
+    } catch (error) {
+        console.dir('Ошибка получения задач:', error);
+        throw error
+    }
+}
 
-// export async function updateTask(taskId, updatedData) {
-//     try {
-//         const user = auth.currentUser;
-//         if (!user) {
-//             throw new Error('Пользователь не авторизован');
-//         }
+export async function updateTask(id, title, desc) {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('Пользователь не авторизован');
+        }
 
-//         const docRef = doc(db, 'tasks', taskId);
+        const docRef = doc(db, 'tasks', id);
 
-//         await updateDoc(docRef, updatedData);
+        const taskData = {
+            title: title,
+            desc: desc
+        }
+
+        await updateDoc(docRef, taskData);
         
-//         // Возвращаем обновленные данные
-//         return {
-//             id: taskId,
-//             ...updatedData
-//         };
-//     } catch (error) {
-//         console.dir('Ошибка обновления задачи:', error);
-//     }
-// }
+        // Возвращаем обновленные данные
+        return {
+            ...taskData
+        };
+    } catch (error) {
+        console.dir('Ошибка обновления задачи:', error);
+        throw error
+    }
+}
 
-// export async function moveTask(taskId, newStatus) {
-//     try {
-//         const user = auth.currentUser;
-//         if (!user) {
-//             throw new Error('Пользователь не авторизован');
-//         }
+export async function moveTask(taskId, newStatus) {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('Пользователь не авторизован');
+        }
 
-//         const docRef = doc(db, 'tasks', taskId);
-//         const updateData = {
-//             status: newStatus,
-//         };
+        const docRef = doc(db, 'tasks', taskId);
+        const updateData = {
+            status: newStatus,
+        };
 
-//         await updateDoc(docRef, updateData);
+        await updateDoc(docRef, updateData);
         
-//         return {
-//             id: taskId,
-//             ...updateData,
-//         };
-//     } catch (error) {
-//         console.dir('Ошибка перемещения задачи:', error);
-//     }
-// }
+        return {
+            id: taskId,
+            ...updateData,
+        };
+    } catch (error) {
+        console.dir('Ошибка перемещения задачи:', error);
+        throw error
+    }
+}
 
-// export async function deleteTask(taskId) {
-//     try {
-//         const user = auth.currentUser;
-//         if (!user) {
-//             throw new Error('Пользователь не авторизован');
-//         }
+export async function deleteTask(id) {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('Пользователь не авторизован');
+        }
 
-//         const docRef = doc(db, 'tasks', taskId);
-//         await deleteDoc(docRef);
+        const docRef = doc(db, 'tasks', id);
+        await deleteDoc(docRef);
         
-//         return { id: taskId, deleted: true };
-//     } catch (error) {
-//         console.dir('Ошибка удаления задачи:', error);
-//     }
-// }
+        return { id: id, deleted: true };
+    } catch (error) {
+        console.dir('Ошибка удаления задачи:', error);
+        throw error
+    }
+}
 
 // export async function deleteAllTasks() {
 //     try {

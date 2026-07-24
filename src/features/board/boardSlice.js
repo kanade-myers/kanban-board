@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { addTask } from '../../api/firebase/db' 
+import { addTask, moveTask, updateTask, deleteTask } from '../../api/firebase/db' 
 
 const initialState = {
     tasks: {
@@ -36,41 +36,61 @@ export const boardSlice = createSlice({
 
             state.columns[task.status].push(task.id)
         },
-        // TODO закончить остальные методы
-    //     moveTaskOptimistic: (state, action) => {
-    //         const id = action.payload.id
-    //         const initialStatus = state.tasks.byId[id].status
-    //         const targetStatus = action.payload.to
+        moveTaskOptimistic: (state, action) => {
+            const id = action.payload.id
+            const initialStatus = state.tasks.byId[id].status
+            const targetStatus = action.payload.to
+            const task = state.tasks.byId[id]
 
-    //         state.columns[initialStatus] = state.columns[initialStatus].filter((item) => item !== id)
-    //         state.tasks.byId[id].status = targetStatus
-    //         state.columns[targetStatus].push(id)
-    //     },
-    //     editTaskOptimistic: (state, action) => {
-    //         const taskId = state.tasks.byId[action.payload.id]
-    //         if (!taskId) {
-    //             console.warn(`Задача ${taskId} не найдена`)
-    //             return
-    //         }
+            if (!task) {
+                console.dir(`Задача с id ${id} не найдена`)
+                return
+            }
+            state.columns[initialStatus] = state.columns[initialStatus].filter((item) => item !== id)
 
-    //         if (action.payload.title !== undefined) {
-    //             taskId.title = action.payload.title || 'Без названия'
-    //         }
+            state.tasks.byId[id]._prevStatus = initialStatus
+            state.tasks.byId[id]._isPending = true
+            state.tasks.byId[id].status = targetStatus
+            state.columns[targetStatus].push(id)
+        },
+        editTaskOptimistic: (state, action) => {
+            const task = state.tasks.byId[action.payload.id]
+            const id = action.payload.id
+            if (!task) {
+                console.warn(`Задача ${id} не найдена`)
+                return
+            }
 
-    //         if (action.payload.desc !== undefined) {
-    //             taskId.desc = action.payload.desc
-    //         }
+            if (action.payload.title !== undefined) {
+                task._prevTitle = task.title
+                task.title = action.payload.title || 'Без названия'
+            }
+
+            if (action.payload.desc !== undefined) {
+                task._prevDesc = task.desc
+                task.desc = action.payload.desc
+            }
             
-    //     },
-    //     deleteTaskOptimistic: (state, action) => {
-    //         const id = action.payload.id
-    //         delete state.tasks.byId[id]
+            task._isPending = true
+        },
+        deleteTaskOptimistic: (state, action) => {
+            const id = action.payload
+            const task = state.tasks.byId[id]
             
-    //         Object.keys(state.columns).forEach(column => {
-    //             state.columns[column] = state.columns[column]
-    //             .filter(item => item !== id)
-    // })
-    //     }
+            if (!task) {
+                console.warn(`Задача ${id} не найдена`)
+                return
+            }
+            
+            // Сохраняем задачу для отката
+            state._deletedTask = { ...task }
+            
+            // Удаляем из колонки
+            state.columns[task.status] = state.columns[task.status].filter(item => item !== id)
+            
+            // Удаляем задачу
+            delete state.tasks.byId[id]  
+        }
     },
      extraReducers: builder => {
         builder
@@ -87,7 +107,7 @@ export const boardSlice = createSlice({
                     }
                     
                     task.id = realId
-                    task._isPending = false
+                    delete task._isPending
                     
                     state.tasks.byId[realId] = task 
                     delete state.tasks.byId[tempId]
@@ -105,7 +125,72 @@ export const boardSlice = createSlice({
                     delete state.tasks.byId[id]
                 }
                 
-                console.warn('Произошел откат задачи:', id)
+                console.dir('Произошел откат задачи:', id)
+            })
+            
+            .addCase(moveInFirebaseAsync.fulfilled, (state, action) => {
+                const id = action.payload.id
+                delete state.tasks.byId[id]._prevStatus
+                delete state.tasks.byId[id]._isPending
+            })
+            .addCase(moveInFirebaseAsync.rejected, (state, action) => {
+                const id = action.payload.id
+                const prevStatus = state.tasks.byId[id]._prevStatus
+                const currentStatus = action.payload.newStatus
+
+                    state.columns[currentStatus] = state.columns[currentStatus].filter((item) => item !== id)
+
+                    delete state.tasks.byId[id]._prevStatus
+                    delete state.tasks.byId[id]._isPending
+                    state.tasks.byId[id].status = prevStatus
+
+                    state.columns[prevStatus].push(id)
+            })
+            .addCase(editInFirebaseAsync.fulfilled, (state, action) => {
+                const id = action.payload.id
+                const task = state.tasks.byId[id]
+                if (task) {
+                    delete task._prevTitle
+                    delete task._prevDesc
+                    delete task._isPending
+                }
+            })
+            .addCase(editInFirebaseAsync.rejected, (state, action) => {
+                const id = action.payload.id
+                const task = state.tasks.byId[id]
+                
+                if (!task) {
+                    console.dir(`Задача с id ${id} не найдена`)
+                    return
+                }
+
+                if (task._prevTitle !== undefined) {
+                    task.title = task._prevTitle
+                }
+                if (task._prevDesc !== undefined) {
+                    task.desc = task._prevDesc
+                }
+
+                delete task._prevTitle
+                delete task._prevDesc
+                delete task._isPending
+            })
+            .addCase(deleteInFirebaseAsync.fulfilled, (state, action) => {
+                const id = action.payload.id
+                delete state._deletedTask
+            })
+            .addCase(deleteInFirebaseAsync.rejected, (state, action) => {
+                const id = action.payload.id
+                const task = state._deletedTask
+                
+                if (task) {
+                    // Восстанавливаем задачу
+                    state.tasks.byId[id] = task
+                    state.columns[task.status].push(id)
+                    delete state._deletedTask
+                }
+                
+                console.warn('Откат удаления задачи:', id)
             })
      }
 })
@@ -139,6 +224,7 @@ export const selectFinishedTasks = (state) => {
     return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
 }
 
+// Асинхронные thunk's для работы с задачами
 export const addToFirebaseAsync = createAsyncThunk(
     'board/addToFirebase',
     async (taskData, {rejectWithValue}) => {
@@ -154,6 +240,56 @@ export const addToFirebaseAsync = createAsyncThunk(
             return rejectWithValue({
                 error: error.message,
                 id: taskData.id
+            })
+        }
+    }
+)
+
+export const moveInFirebaseAsync = createAsyncThunk(
+    'board/moveInFirebaseAsync',
+    async ({id, newStatus}, {rejectWithValue}) => {
+        try {
+            const updatedTask = await moveTask(id, newStatus)
+            return updatedTask
+        }
+        catch (error) {
+            console.dir(`Ошибка перемещения задачи с id ${id}`)
+            return rejectWithValue({
+                id: id,
+                newStatus: newStatus,
+                error: error.message
+            })
+        }
+    }
+)
+
+export const editInFirebaseAsync = createAsyncThunk(
+    'board/editInFirebaseAsync',
+    async ({id, title, desc}, {rejectWithValue}) => {
+        try {
+            const updatedTaskData = await updateTask(id, title, desc)
+            return {...updatedTaskData, id: id}
+        }
+        catch (error) {
+            console.dir(`Не удалось внести изменения в задачу с id ${id}`)
+            return rejectWithValue({
+                id: id
+            })
+        }
+    }
+)
+
+export const deleteInFirebaseAsync = createAsyncThunk(
+    'board/deleteInFirebaseAsync',
+    async (id, { rejectWithValue }) => {
+        try {
+            const result = await deleteTask(id)
+            return result  // { id, deleted: true }
+        } catch (error) {
+            console.dir(`Ошибка удаления задачи с id ${id}`)
+            return rejectWithValue({
+                id: id,
+                error: error.message
             })
         }
     }
