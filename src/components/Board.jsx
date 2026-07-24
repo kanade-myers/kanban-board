@@ -5,10 +5,13 @@ import { addTaskOptimistic,
          editTaskOptimistic,
          deleteTaskOptimistic,
          addToFirebaseAsync,
+         moveInFirebaseAsync,
+         editInFirebaseAsync,
+         deleteInFirebaseAsync,
          selectBacklogTasks,
          selectReadyTasks,
          selectInProgressTasks,
-         selectFinishedTasks } from '../features/board/boardSlice.js'
+         selectFinishedTasks} from '../features/board/boardSlice.js'
 
 import { useDispatch, useSelector } from "react-redux"
 
@@ -19,7 +22,7 @@ export default function Board() {
     const inProgress = useSelector(selectInProgressTasks)
     const finished = useSelector(selectFinishedTasks)
 
-    function handleAddTask(taskData) {
+    const handleAddTask = (taskData) => {
         const tempId = crypto.randomUUID()
         const task = {
             ...taskData,
@@ -31,6 +34,20 @@ export default function Board() {
         dispatch(addToFirebaseAsync(task))
     }
 
+    const handleMoveTask = (id, to) => {
+        dispatch(moveTaskOptimistic({id, to}))
+        dispatch(moveInFirebaseAsync({id, to}))
+    }
+
+    const handleEditTask = (id, title, desc) => {
+        dispatch(editTaskOptimistic({id, title, desc}))
+        dispatch(editInFirebaseAsync({id, title, desc}))
+    }
+
+    const handleDelete = (task) => {
+        dispatch(deleteTaskOptimistic(task.id))
+        dispatch(deleteInFirebaseAsync(task.id))
+    }
 
     return(
         <>
