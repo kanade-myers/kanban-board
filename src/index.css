@@ -1,1 +1,5 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+
+/* Принудительно заставляем Tailwind искать классы в вашей кастомной папке components */
+@source "./components/**/*.{ts,tsx}";
+@source "./app/**/*.{ts,tsx}";

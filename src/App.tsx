@@ -1,6 +1,7 @@
 import { ThemeProvider } from "./context/ThemeContext"
 import Board from "./components/Board"
 import { Toaster } from "./components/ui/sonner"
+import './index.css' // <-- ЭТА СТРОЧКА ЕСТЬ? Она обязательна!
 
 export default function App() {
 
