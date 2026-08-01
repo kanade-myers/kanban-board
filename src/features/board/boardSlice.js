@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit'
-import { addTask, moveTask, updateTask, deleteTask } from '../../api/firebase/db' 
+import { addTask, moveTask, updateTask, deleteTask, deleteAllTasks } from '../../api/firebase/db'
+import { toast } from "sonner" 
 
 const initialState = {
     tasks: {
@@ -10,11 +11,11 @@ const initialState = {
             '4': {id: '4', title: 'Задача 4', desc: 'дескрипш', createdAt: Date.now(), status: 'finished'},
         }
     },
-        columns: {
-            'backlog': ['1'],
-            'ready': ['2'],
-            'in-progress': ['3'],
-            'finished': ['4'],
+    columns: {
+        'backlog': ['1'],
+        'ready': ['2'],
+        'in-progress': ['3'],
+        'finished': ['4'],
     }
 }
 
@@ -90,6 +91,26 @@ export const boardSlice = createSlice({
             
             // Удаляем задачу
             delete state.tasks.byId[id]  
+        },
+        deleteAllTasksOptimistic: (state) => {
+            state._deletedAllTasks = {
+                byId: { ...state.tasks.byId },
+                columns: {
+                    backlog: [...state.columns.backlog],
+                    ready: [...state.columns.ready],
+                    'in-progress': [...state.columns['in-progress']],
+                    finished: [...state.columns.finished],
+                }
+            }
+            
+            state.columns = {
+                backlog: [],
+                ready: [],
+                'in-progress': [],
+                finished: [],
+            }
+            
+            state.tasks.byId = {} 
         }
     },
      extraReducers: builder => {
@@ -114,6 +135,8 @@ export const boardSlice = createSlice({
                 }
             })
             .addCase(addToFirebaseAsync.rejected, (state, action) => {
+                toast.error(`Не удалось добавить задачу ${state.tasks.byId[id].title}`)
+                
                 const id = action.payload.id
                 const task = state.tasks.byId[id]
                 
@@ -145,6 +168,8 @@ export const boardSlice = createSlice({
                     state.tasks.byId[id].status = prevStatus
 
                     state.columns[prevStatus].push(id)
+
+                    toast.error(`Не удалось изменить статус задачи "${state.tasks.byId[id].title}"`)
             })
             .addCase(editInFirebaseAsync.fulfilled, (state, action) => {
                 const id = action.payload.id
@@ -174,6 +199,8 @@ export const boardSlice = createSlice({
                 delete task._prevTitle
                 delete task._prevDesc
                 delete task._isPending
+
+                toast.error(`Не удалось применить изменения для задачи "${state.tasks.byId[id].title}"`)
             })
             .addCase(deleteInFirebaseAsync.fulfilled, (state, action) => {
                 const id = action.payload.id
@@ -190,7 +217,25 @@ export const boardSlice = createSlice({
                     delete state._deletedTask
                 }
                 
-                console.warn('Откат удаления задачи:', id)
+                toast.error(`Не удалось удалить задачу "${state.tasks.byId[id].title}"`)
+                console.dir('Откат удаления задачи:', id)
+            })
+            .addCase(deleteAllInFirebaseAsync.fulfilled, (state, action) => {
+                delete state._deletedAllTasks
+                toast.success(`Успешно удалено ${action.payload.deleted} задач`)
+                console.dir(`Удалено всего ${action.payload.deleted} задач`)
+            })
+            .addCase(deleteAllInFirebaseAsync.rejected, (state, action) => {
+                const backup = state._deletedAllTasks
+                
+                if (backup) {
+                    state.tasks.byId = backup.byId
+                    state.columns = backup.columns
+                    delete state._deletedAllTasks
+                }
+                
+                toast.error('Не удалось произвести удаление всех задач')
+                console.dir('Откат удаления всех задач')
             })
      }
 })
@@ -198,7 +243,8 @@ export const boardSlice = createSlice({
 export const { addTaskOptimistic,
                moveTaskOptimistic,
                editTaskOptimistic,
-               deleteTaskOptimistic
+               deleteTaskOptimistic,
+               deleteAllTasksOptimistic
             } = boardSlice.actions
 
 export default boardSlice.reducer
@@ -289,6 +335,21 @@ export const deleteInFirebaseAsync = createAsyncThunk(
             console.dir(`Ошибка удаления задачи с id ${id}`)
             return rejectWithValue({
                 id: id,
+                error: error.message
+            })
+        }
+    }
+)
+
+export const deleteAllInFirebaseAsync = createAsyncThunk(
+    'board/deleteAllInFirebaseAsync',
+    async (_, {rejectWithValue}) => {
+        try {
+            const result = await deleteAllTasks()
+            return result
+        }
+        catch (error) {
+            return rejectWithValue({
                 error: error.message
             })
         }

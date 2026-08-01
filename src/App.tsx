@@ -1,7 +1,7 @@
 import { ThemeProvider } from "./context/ThemeContext"
-import Board from "./components/Board"
+import Board from "./components/Board/Board"
 import { Toaster } from "./components/ui/sonner"
-import './index.css' // <-- ЭТА СТРОЧКА ЕСТЬ? Она обязательна!
+import './index.css'
 
 export default function App() {
 
@@ -17,7 +17,7 @@ export default function App() {
                 background: '#1a1a2e',
                 color: '#fff',
                 border: '1px solid #16213e',
-                width: 'fit-content', // чтобы ширина подстраивалась под контент[citation:11]
+                width: 'fit-content',
                 },
                 className: 'my-custom-toast',
                 descriptionClassName: 'my-description',

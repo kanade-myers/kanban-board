@@ -128,29 +128,29 @@ export async function deleteTask(id) {
     }
 }
 
-// export async function deleteAllTasks() {
-//     try {
-//         const user = auth.currentUser;
-//         if (!user) {
-//             throw new Error('Пользователь не авторизован');
-//         }
+export async function deleteAllTasks() {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('Пользователь не авторизован');
+        }
 
-//         const q = query(
-//             collection(db, 'tasks'),
-//             where('userId', '==', user.uid)
-//         );
-//         const querySnapshot = await getDocs(q);
+        const q = query(
+            collection(db, 'tasks'),
+            where('userId', '==', user.uid)
+        );
+        const querySnapshot = await getDocs(q);
         
-//         const deletePromises = [];
-//         querySnapshot.forEach((doc) => {
-//             deletePromises.push(deleteDoc(doc.ref));
-//         });
+        const deletePromises = [];
+        querySnapshot.forEach((doc) => {
+            deletePromises.push(deleteDoc(doc.ref));
+        });
         
-//         await Promise.all(deletePromises);
+        await Promise.all(deletePromises);
         
-//         return { deleted: deletePromises.length };
-//     } catch (error) {
-//         console.dir('Ошибка удаления всех задач:', error);
-//         throw error;
-//     }
-// }
+        return { deleted: deletePromises.length };
+    } catch (error) {
+        console.dir('Ошибка удаления всех задач:', error);
+        throw error;
+    }
+}
