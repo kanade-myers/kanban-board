@@ -13,6 +13,8 @@ export default function ThemeToggleButton() {
         }
     }
     return (
-        <img src="images/Moon.svg" alt="Сменить тему" onClick={handleToggleThemeClick}/>
+        <div>
+            <img src="images/Moon.svg" alt="Сменить тему" onClick={handleToggleThemeClick}/>
+        </div>
     )
 }

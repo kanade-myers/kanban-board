@@ -1,15 +1,17 @@
 import { ThemeProvider } from "./context/ThemeContext"
-import Board from "./components/Board/Board"
 import { Toaster } from "./components/ui/sonner"
 import './index.css'
+import HomeScreen from './screens/HomeScreen'
+import BoardScreen from './screens/BoardScreen'
 
 export default function App() {
 
     return (
         <>
         <ThemeProvider>
-            <Board />
+            <BoardScreen />
         </ThemeProvider>
+        {/* <HomeScreen /> */}
         <Toaster 
             position="top-center"
             toastOptions={{
