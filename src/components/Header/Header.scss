@@ -13,12 +13,21 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+
+    &__right-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 154px;
+    }
 }
 
 .header-container h1 {
     color: #FDFBF7;
     font-size: 20px;
-    font-weight: bold;
+    font-weight: 400;
 }
 
 .profile-container {
@@ -27,13 +36,4 @@
     justify-content: space-between;
     max-width: 76px;
     width: 100%;
-}
-
-.header-container__right-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    max-width: 154px;
 }
