@@ -1,0 +1,36 @@
+.footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    background-color: #5F6D5C;
+    height: 60px;
+}
+
+.footer-container {
+    width: 100%;
+    max-width: 1440px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-container__task-info-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 481px;
+    color: #FDFBF7;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.footer-container__user-info-container {
+    color: #FDFBF7;
+    font-size: 20px;
+    font-weight: bold;
+}

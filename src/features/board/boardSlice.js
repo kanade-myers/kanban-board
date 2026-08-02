@@ -1,20 +1,45 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { addTask, moveTask, updateTask, deleteTask } from '../../api/firebase/db' 
+import { createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit'
+import { addTask, moveTask, updateTask, deleteTask, deleteAllTasks } from '../../api/firebase/db'
+import { toast } from "sonner" 
 
 const initialState = {
     tasks: {
         byId: {
-            '1': {id: '1', title: 'Задача 1', desc: 'дескрипш', createdAt: Date.now(), status: 'backlog'},
-            '2': {id: '2', title: 'Задача 2', desc: 'дескрипш', createdAt: Date.now(), status: 'ready' },
-            '3': {id: '3', title: 'Задача 3', desc: 'дескрипш', createdAt: Date.now(), status: 'in-progress'},
-            '4': {id: '4', title: 'Задача 4', desc: 'дескрипш', createdAt: Date.now(), status: 'finished'},
+            '1': {id: '1', title: 'Создать дизайн-макет', desc: 'Разработать главный экран приложения', createdAt: Date.now() - 86400000 * 5, status: 'backlog'},
+            '2': {id: '2', title: 'Настроить CI/CD', desc: 'Настроить автоматическую сборку и деплой', createdAt: Date.now() - 86400000 * 4, status: 'backlog'},
+            '3': {id: '3', title: 'Оптимизировать запросы к БД', desc: 'Добавить индексы и оптимизировать сложные запросы', createdAt: Date.now() - 86400000 * 4, status: 'backlog'},
+            '4': {id: '4', title: 'Разработать API для авторизации', desc: 'JWT + refresh токены', createdAt: Date.now() - 86400000 * 3, status: 'backlog'},
+            '5': {id: '5', title: 'Написать unit-тесты для сервиса', desc: 'Покрыть тестами основные бизнес-логику', createdAt: Date.now() - 86400000 * 3, status: 'backlog'},
+            '6': {id: '6', title: 'Добавить валидацию форм', desc: 'На клиенте и на сервере', createdAt: Date.now() - 86400000 * 2, status: 'backlog'},
+            '7': {id: '7', title: 'Настроить мониторинг', desc: 'Добавить логирование и метрики', createdAt: Date.now() - 86400000 * 2, status: 'backlog'},
+            
+            '8': {id: '8', title: 'Рефакторинг компонентов', desc: 'Разбить большие компоненты на мелкие', createdAt: Date.now() - 86400000 * 6, status: 'ready'},
+            '9': {id: '9', title: 'Обновить зависимости', desc: 'Обновить все пакеты до актуальных версий', createdAt: Date.now() - 86400000 * 5, status: 'ready'},
+            '10': {id: '10', title: 'Добавить ESLint', desc: 'Настроить линтер и исправить ошибки', createdAt: Date.now() - 86400000 * 4, status: 'ready'},
+            '11': {id: '11', title: 'Написать документацию API', desc: 'Swagger/OpenAPI спецификация', createdAt: Date.now() - 86400000 * 3, status: 'ready'},
+            
+            '12': {id: '12', title: 'Разработать дашборд', desc: 'Главная страница с аналитикой', createdAt: Date.now() - 86400000 * 7, status: 'in-progress'},
+            '13': {id: '13', title: 'Интеграция с платежной системой', desc: 'Подключить Stripe', createdAt: Date.now() - 86400000 * 6, status: 'in-progress'},
+            '14': {id: '14', title: 'Добавить уведомления', desc: 'Real-time уведомления через WebSocket', createdAt: Date.now() - 86400000 * 5, status: 'in-progress'},
+            '15': {id: '15', title: 'Оптимизировать загрузку изображений', desc: 'Добавить ленивую загрузку и WebP', createdAt: Date.now() - 86400000 * 4, status: 'in-progress'},
+            '16': {id: '16', title: 'Написать middleware для логирования', desc: 'Логировать все запросы и ответы', createdAt: Date.now() - 86400000 * 3, status: 'in-progress'},
+            '17': {id: '17', title: 'Создать компонент таблицы', desc: 'С сортировкой и фильтрацией', createdAt: Date.now() - 86400000 * 2, status: 'in-progress'},
+            
+            '18': {id: '18', title: 'Верстка главной страницы', desc: 'Адаптивная верстка по макету', createdAt: Date.now() - 86400000 * 9, status: 'finished'},
+            '19': {id: '19', title: 'Настроить роутинг', desc: 'React Router с защищенными маршрутами', createdAt: Date.now() - 86400000 * 8, status: 'finished'},
+            '20': {id: '20', title: 'Подключить Redux', desc: 'Настроить store, reducers, actions', createdAt: Date.now() - 86400000 * 8, status: 'finished'},
+            '21': {id: '21', title: 'Создать модальные окна', desc: 'Переиспользуемые модалки с порталами', createdAt: Date.now() - 86400000 * 7, status: 'finished'},
+            '22': {id: '22', title: 'Настроить Webpack', desc: 'Кастомная сборка с оптимизациями', createdAt: Date.now() - 86400000 * 7, status: 'finished'},
+            '23': {id: '23', title: 'Добавить темную тему', desc: 'Переключение светлой и темной темы', createdAt: Date.now() - 86400000 * 6, status: 'finished'},
+            '24': {id: '24', title: 'Написать хуки для формы', desc: 'Кастомные хуки валидации', createdAt: Date.now() - 86400000 * 6, status: 'finished'},
+            '25': {id: '25', title: 'Создать 404 страницу', desc: 'Ссылка на главную и поиск', createdAt: Date.now() - 86400000 * 5, status: 'finished'},
         }
     },
-        columns: {
-            'backlog': ['1'],
-            'ready': ['2'],
-            'in-progress': ['3'],
-            'finished': ['4'],
+    columns: {
+        'backlog': ['1', '2', '3', '4', '5', '6', '7'],
+        'ready': ['8', '9', '10', '11'],
+        'in-progress': ['12', '13', '14', '15', '16', '17'],
+        'finished': ['18', '19', '20', '21', '22', '23', '24', '25'],
     }
 }
 
@@ -90,6 +115,26 @@ export const boardSlice = createSlice({
             
             // Удаляем задачу
             delete state.tasks.byId[id]  
+        },
+        deleteAllTasksOptimistic: (state) => {
+            state._deletedAllTasks = {
+                byId: { ...state.tasks.byId },
+                columns: {
+                    backlog: [...state.columns.backlog],
+                    ready: [...state.columns.ready],
+                    'in-progress': [...state.columns['in-progress']],
+                    finished: [...state.columns.finished],
+                }
+            }
+            
+            state.columns = {
+                backlog: [],
+                ready: [],
+                'in-progress': [],
+                finished: [],
+            }
+            
+            state.tasks.byId = {} 
         }
     },
      extraReducers: builder => {
@@ -114,6 +159,8 @@ export const boardSlice = createSlice({
                 }
             })
             .addCase(addToFirebaseAsync.rejected, (state, action) => {
+                toast.error(`Не удалось добавить задачу ${state.tasks.byId[id].title}`)
+                
                 const id = action.payload.id
                 const task = state.tasks.byId[id]
                 
@@ -145,6 +192,8 @@ export const boardSlice = createSlice({
                     state.tasks.byId[id].status = prevStatus
 
                     state.columns[prevStatus].push(id)
+
+                    toast.error(`Не удалось изменить статус задачи "${state.tasks.byId[id].title}"`)
             })
             .addCase(editInFirebaseAsync.fulfilled, (state, action) => {
                 const id = action.payload.id
@@ -174,6 +223,8 @@ export const boardSlice = createSlice({
                 delete task._prevTitle
                 delete task._prevDesc
                 delete task._isPending
+
+                toast.error(`Не удалось применить изменения для задачи "${state.tasks.byId[id].title}"`)
             })
             .addCase(deleteInFirebaseAsync.fulfilled, (state, action) => {
                 const id = action.payload.id
@@ -190,7 +241,25 @@ export const boardSlice = createSlice({
                     delete state._deletedTask
                 }
                 
-                console.warn('Откат удаления задачи:', id)
+                toast.error(`Не удалось удалить задачу "${state.tasks.byId[id].title}"`)
+                console.dir('Откат удаления задачи:', id)
+            })
+            .addCase(deleteAllInFirebaseAsync.fulfilled, (state, action) => {
+                delete state._deletedAllTasks
+                toast.success(`Успешно удалено ${action.payload.deleted} задач`)
+                console.dir(`Удалено всего ${action.payload.deleted} задач`)
+            })
+            .addCase(deleteAllInFirebaseAsync.rejected, (state, action) => {
+                const backup = state._deletedAllTasks
+                
+                if (backup) {
+                    state.tasks.byId = backup.byId
+                    state.columns = backup.columns
+                    delete state._deletedAllTasks
+                }
+                
+                toast.error('Не удалось произвести удаление всех задач')
+                console.dir('Откат удаления всех задач')
             })
      }
 })
@@ -198,31 +267,32 @@ export const boardSlice = createSlice({
 export const { addTaskOptimistic,
                moveTaskOptimistic,
                editTaskOptimistic,
-               deleteTaskOptimistic
+               deleteTaskOptimistic,
+               deleteAllTasksOptimistic
             } = boardSlice.actions
 
 export default boardSlice.reducer
 
-// Селекторы для получения задач по колонкам
-export const selectBacklogTasks = (state) => {
-    const taskIds = state.boards.columns['backlog'] || []
-    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
-}
+// Селекторы
+const selectColumns = (state) => state.boards.columns;
+const selectTasksById = (state) => state.boards.tasks.byId;
 
-export const selectReadyTasks = (state) => {
-    const taskIds = state.boards.columns['ready'] || []
-    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
-}
+// Вспомогательная функция для создания селектора колонки
+const createColumnSelector = (columnName) => {
+  return createSelector(
+    [selectColumns, selectTasksById],
+    (columns, tasksById) => {
+      const taskIds = columns[columnName] || [];
+      return taskIds.map(id => tasksById[id]).filter(Boolean);
+    }
+  );
+};
 
-export const selectInProgressTasks = (state) => {
-    const taskIds = state.boards.columns['in-progress'] || []
-    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
-}
-
-export const selectFinishedTasks = (state) => {
-    const taskIds = state.boards.columns['finished'] || []
-    return taskIds.map(id => state.boards.tasks.byId[id]).filter(Boolean)
-}
+// Экспортируем отдельные селекторы
+export const selectBacklogTasks = createColumnSelector('backlog');
+export const selectReadyTasks = createColumnSelector('ready');
+export const selectInProgressTasks = createColumnSelector('in-progress');
+export const selectFinishedTasks = createColumnSelector('finished');
 
 // Асинхронные thunk's для работы с задачами
 export const addToFirebaseAsync = createAsyncThunk(
@@ -289,6 +359,21 @@ export const deleteInFirebaseAsync = createAsyncThunk(
             console.dir(`Ошибка удаления задачи с id ${id}`)
             return rejectWithValue({
                 id: id,
+                error: error.message
+            })
+        }
+    }
+)
+
+export const deleteAllInFirebaseAsync = createAsyncThunk(
+    'board/deleteAllInFirebaseAsync',
+    async (_, {rejectWithValue}) => {
+        try {
+            const result = await deleteAllTasks()
+            return result
+        }
+        catch (error) {
+            return rejectWithValue({
                 error: error.message
             })
         }
