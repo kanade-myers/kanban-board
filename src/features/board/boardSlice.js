@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice, createSelector } from '@reduxjs/toolkit'
-import { addTask, moveTask, updateTask, deleteTask, deleteAllTasks } from '../../api/firebase/db'
+import { addTask, moveTask, updateTask, deleteTask, deleteAllTasks, getTasks } from '../../api/firebase/db'
 import { toast } from "sonner" 
 
 const initialState = {
@@ -40,7 +40,8 @@ const initialState = {
         'ready': ['8', '9', '10', '11'],
         'in-progress': ['12', '13', '14', '15', '16', '17'],
         'finished': ['18', '19', '20', '21', '22', '23', '24', '25'],
-    }
+    },
+    _loading: false
 }
 
 export const boardSlice = createSlice({
@@ -261,6 +262,54 @@ export const boardSlice = createSlice({
                 toast.error('Не удалось произвести удаление всех задач')
                 console.dir('Откат удаления всех задач')
             })
+            .addCase(getTasksFromFirebaseAsync.fulfilled, (state, action) => {
+            const tasks = action.payload;
+            
+            // Очищаем текущие задачи
+            state.tasks.byId = {};
+            state.columns = {
+                backlog: [],
+                ready: [],
+                'in-progress': [],
+                finished: [],
+            };
+            
+            // Добавляем полученные задачи в store
+            Object.values(tasks).forEach(task => {
+                const taskId = task.id;
+                const status = task.status || 'backlog';
+                
+                // Добавляем в byId
+                state.tasks.byId[taskId] = {
+                    id: taskId,
+                    title: task.title || 'Без названия',
+                    desc: task.desc || '',
+                    createdAt: task.createdAt || Date.now(),
+                    status: status,
+                };
+                
+                // Добавляем ID в соответствующую колонку
+                if (state.columns[status]) {
+                    state.columns[status].push(taskId);
+                }
+            });
+            
+            toast.success(`Загружено ${Object.keys(tasks).length} задач`);
+            console.dir(`Успешно загружено задач: ${Object.keys(tasks).length}`);
+
+            state._loading = false
+        })
+        .addCase(getTasksFromFirebaseAsync.rejected, (state, action) => {
+            toast.error('Не удалось загрузить задачи. Проверьте подключение к интернету.');
+
+            console.dir('Ошибка загрузки задач:', action.error);
+
+            state._loading = false
+        })
+        .addCase(getTasksFromFirebaseAsync.pending, (state, action) => {
+            state._loading = true
+            
+        })
      }
 })
 
@@ -376,6 +425,21 @@ export const deleteAllInFirebaseAsync = createAsyncThunk(
             return rejectWithValue({
                 error: error.message
             })
+        }
+    }
+)
+
+export const getTasksFromFirebaseAsync = createAsyncThunk(
+    'board/getTasksFromFirebaseAsync',
+    async (_, { rejectWithValue }) => {
+        try {
+            const tasks = await getTasks();
+            return tasks;
+        } catch (error) {
+            console.dir('Не получилось загрузить задачи из фаербазы:', error);
+            return rejectWithValue({
+                error: error.message || 'Ошибка загрузки задач'
+            });
         }
     }
 )
